@@ -3,6 +3,13 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
+console.log("DB Config:", {
+  host: process.env.DB_HOST,
+  port: process.env.DB_PORT,
+  user: process.env.DB_USER,
+  database: process.env.DB_NAME,
+});
+
 export const pool = mysql.createPool({
   host: process.env.DB_HOST,
   port: Number(process.env.DB_PORT),
@@ -15,6 +22,11 @@ export const pool = mysql.createPool({
 });
 
 export const query = async (sql, params = {}) => {
-  const [rows] = await pool.execute(sql, params);
-  return rows;
+  try {
+    const [rows] = await pool.execute(sql, params);
+    return rows;
+  } catch (err) {
+    console.error("DB ERROR:", err);
+    throw err;
+  }
 };

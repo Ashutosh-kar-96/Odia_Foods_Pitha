@@ -11,6 +11,7 @@ import { query } from "./config/db.js";
 import fs from "fs/promises";
 import path from "path";
 import { fileURLToPath } from "url";
+import { products, knowledgePosts } from "./data/seedData.js";
 
 dotenv.config();
 
@@ -417,6 +418,63 @@ app.get("/api/setup-db", async (req, res) => {
     res.status(500).json({
       message: error.message,
       sqlMessage: error.sqlMessage
+    });
+  }
+});
+
+app.get("/api/seed-data", async (req, res) => {
+  try {
+    // Create admin
+    const adminHash = await bcrypt.hash("Admin@123", 10);
+
+    await query(
+      `INSERT IGNORE INTO users (name,email,password_hash,role)
+       VALUES ('Marketplace Admin','admin@pitha.com',:password,'admin')`,
+      { password: adminHash }
+    );
+
+    // Insert products
+    for (const product of products) {
+      await query(
+        `INSERT IGNORE INTO products
+        (
+          name,slug,category,short_description,description,
+          cultural_significance,ingredients,preparation,
+          region_origin,nutrition,storage,shelf_life_days,
+          price,availability,sizes,image_url,festival_tag,
+          popularity,stock,manufacturing_date,expiry_date
+        )
+        VALUES
+        (
+          :name,:slug,:category,:short_description,:description,
+          :cultural_significance,:ingredients,:preparation,
+          :region_origin,:nutrition,:storage,:shelf_life_days,
+          :price,:availability,:sizes,:image_url,:festival_tag,
+          100,50,CURDATE(),
+          DATE_ADD(CURDATE(), INTERVAL :shelf_life_days DAY)
+        )`,
+        product
+      );
+    }
+
+    // Insert knowledge posts
+    for (const post of knowledgePosts) {
+      await query(
+        `INSERT IGNORE INTO knowledge_posts
+        (title,slug,excerpt,content,category)
+        VALUES
+        (:title,:slug,:excerpt,:content,:category)`,
+        post
+      );
+    }
+
+    res.json({
+      success: true,
+      message: "Seed data inserted"
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message
     });
   }
 });

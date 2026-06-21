@@ -377,6 +377,13 @@ app.use((error, _req, res, _next) => {
   res.status(500).json({ message: "Server error", detail: process.env.NODE_ENV === "production" ? undefined : error.message });
 });
 
+app.get("/", (req, res) => {
+  res.json({
+    success: true,
+    message: "Odia Foods Pitha API is running 🚀"
+  });
+});
+
 app.listen(port, () => {
   console.log(`API running on http://localhost:${port}`);
 });

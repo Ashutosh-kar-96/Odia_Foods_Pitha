@@ -1,6 +1,3 @@
-CREATE DATABASE IF NOT EXISTS odisha_pitha_marketplace CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE odisha_pitha_marketplace;
-
 CREATE TABLE IF NOT EXISTS users (
   id INT AUTO_INCREMENT PRIMARY KEY,
   name VARCHAR(120) NOT NULL,

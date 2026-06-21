@@ -8,6 +8,9 @@ import rateLimit from "express-rate-limit";
 import Razorpay from "razorpay";
 import { adminOnly, auth } from "./middleware/auth.js";
 import { query } from "./config/db.js";
+import fs from "fs/promises";
+import path from "path";
+import { fileURLToPath } from "url";
 
 dotenv.config();
 
@@ -372,17 +375,49 @@ app.put("/api/admin/products/:id", auth, adminOnly, async (req, res, next) => {
   }
 });
 
-// app.use((error, _req, res, _next) => {
-//   console.error(error);
-//   res.status(500).json({ message: "Server error", detail: process.env.NODE_ENV === "production" ? undefined : error.message });
-// });
+app.use((error, _req, res, _next) => {
+  console.error(error);
+  res.status(500).json({ message: "Server error", detail: process.env.NODE_ENV === "production" ? undefined : error.message });
+});
 
-app.get("/api/products", async (req, res, next) => {
+// app.get("/api/products", async (req, res, next) => {
+//   try {
+//     const products = await query("SELECT * FROM products");
+//     res.json(products);
+//   } catch (error) {
+//     next(error); // sends error here
+//   }
+// });
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+app.get("/api/setup-db", async (req, res) => {
   try {
-    const products = await query("SELECT * FROM products");
-    res.json(products);
+    const schema = await fs.readFile(
+      path.join(__dirname, "schema.sql"),
+      "utf8"
+    );
+
+    const statements = schema
+      .split(";")
+      .map((s) => s.trim())
+      .filter(Boolean);
+
+    for (const statement of statements) {
+      await query(statement);
+    }
+
+    res.json({
+      success: true,
+      message: "Database tables created"
+    });
   } catch (error) {
-    next(error); // sends error here
+    console.error(error);
+
+    res.status(500).json({
+      message: error.message,
+      sqlMessage: error.sqlMessage
+    });
   }
 });
 

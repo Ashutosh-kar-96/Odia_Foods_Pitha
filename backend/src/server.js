@@ -372,9 +372,18 @@ app.put("/api/admin/products/:id", auth, adminOnly, async (req, res, next) => {
   }
 });
 
-app.use((error, _req, res, _next) => {
-  console.error(error);
-  res.status(500).json({ message: "Server error", detail: process.env.NODE_ENV === "production" ? undefined : error.message });
+// app.use((error, _req, res, _next) => {
+//   console.error(error);
+//   res.status(500).json({ message: "Server error", detail: process.env.NODE_ENV === "production" ? undefined : error.message });
+// });
+
+app.get("/api/products", async (req, res, next) => {
+  try {
+    const products = await query("SELECT * FROM products");
+    res.json(products);
+  } catch (error) {
+    next(error); // sends error here
+  }
 });
 
 app.get("/", (req, res) => {

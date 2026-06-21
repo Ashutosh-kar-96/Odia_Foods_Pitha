@@ -433,6 +433,14 @@ app.get("/api/seed-data", async (req, res) => {
       { password: adminHash }
     );
 
+    const customerHash = await bcrypt.hash("Customer@123", 10);
+
+    await query(
+      `INSERT IGNORE INTO users (name,email,password_hash,role)
+   VALUES ('Demo Customer','customer@pitha.com',:password,'customer')`,
+      { password: customerHash }
+    );
+
     // Insert products
     for (const product of products) {
       await query(

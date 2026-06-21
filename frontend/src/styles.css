@@ -1,0 +1,40 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-rice text-ink antialiased;
+  }
+
+  :focus-visible {
+    @apply outline outline-2 outline-offset-2 outline-sindoor;
+  }
+}
+
+@layer components {
+  .container-page {
+    @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center rounded-md bg-temple px-5 py-3 text-sm font-semibold text-white shadow-soft transition hover:bg-sindoor disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center rounded-md border border-temple/20 bg-white px-5 py-3 text-sm font-semibold text-temple transition hover:border-temple hover:bg-rice;
+  }
+
+  .input {
+    @apply w-full rounded-md border border-clay/20 bg-white px-4 py-3 text-sm outline-none transition placeholder:text-ink/40 focus:border-temple focus:ring-2 focus:ring-haldi/40;
+  }
+
+  .section-title {
+    @apply font-display text-3xl font-bold text-temple md:text-4xl;
+  }
+
+  .motif-border {
+    background-image: radial-gradient(circle at 12px 12px, rgba(143, 29, 20, 0.18) 2px, transparent 2px);
+    background-size: 24px 24px;
+  }
+}

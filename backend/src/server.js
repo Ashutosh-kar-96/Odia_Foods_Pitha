@@ -300,6 +300,13 @@ app.post("/api/orders", auth, async (req, res, next) => {
       );
     }
     await query("DELETE FROM cart_items WHERE user_id = :userId", { userId: req.user.id });
+
+    const itemSummary = items.map(i => `${i.name} x${i.quantity} @ ₹${i.price}`).join(" | ");
+    const notifMsg = `New order ${orderNumber} from ${req.user.name} (${req.user.email}) | Items: ${itemSummary} | Total: ₹${total} | Ship to: ${shippingAddress}`;
+    await query(
+      "INSERT INTO admin_notifications (order_id, message) VALUES (:orderId, :notifMsg)",
+      { orderId, notifMsg }
+    );
     res.status(201).json({ id: orderId, orderNumber, total });
   } catch (error) {
     next(error);
@@ -374,6 +381,20 @@ app.put("/api/admin/products/:id", auth, adminOnly, async (req, res, next) => {
   } catch (error) {
     next(error);
   }
+});
+
+app.get("/api/admin/notifications", auth, adminOnly, async (_req, res, next) => {
+  try {
+    const rows = await query("SELECT * FROM admin_notifications WHERE is_read = 0 ORDER BY created_at DESC");
+    res.json(rows);
+  } catch (error) { next(error); }
+});
+
+app.patch("/api/admin/notifications/:id/read", auth, adminOnly, async (req, res, next) => {
+  try {
+    await query("UPDATE admin_notifications SET is_read = 1 WHERE id = :id", { id: req.params.id });
+    res.json({ message: "Marked as read" });
+  } catch (error) { next(error); }
 });
 
 app.use((error, _req, res, _next) => {

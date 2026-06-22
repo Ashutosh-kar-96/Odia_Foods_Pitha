@@ -21,7 +21,8 @@ export const WishlistProvider = ({ children }) => {
     loadWishlist().catch(() => setItems([]));
   }, [token]);
 
-  const isWishlisted = (productId) => items.some((item) => Number(item.id) === Number(productId));
+  const isWishlisted = (productId) =>
+    items.some((item) => Number(item.id) === Number(productId));
 
   const toggleWishlist = async (product) => {
     if (!token) {
@@ -31,12 +32,20 @@ export const WishlistProvider = ({ children }) => {
       await api.delete(`/wishlist/${product.id}`);
     } else {
       await api.post(`/wishlist/${product.id}`);
+      await loadWishlist();
+      return "added";
     }
-    await loadWishlist();
   };
 
-  const value = useMemo(() => ({ items, loadWishlist, toggleWishlist, isWishlisted }), [items, token]);
-  return <WishlistContext.Provider value={value}>{children}</WishlistContext.Provider>;
+  const value = useMemo(
+    () => ({ items, loadWishlist, toggleWishlist, isWishlisted }),
+    [items, token],
+  );
+  return (
+    <WishlistContext.Provider value={value}>
+      {children}
+    </WishlistContext.Provider>
+  );
 };
 
 export const useWishlist = () => useContext(WishlistContext);

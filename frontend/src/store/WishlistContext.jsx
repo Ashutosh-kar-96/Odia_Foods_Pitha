@@ -30,6 +30,8 @@ export const WishlistProvider = ({ children }) => {
     }
     if (isWishlisted(product.id)) {
       await api.delete(`/wishlist/${product.id}`);
+      await loadWishlist();
+      return "removed";
     } else {
       await api.post(`/wishlist/${product.id}`);
       await loadWishlist();

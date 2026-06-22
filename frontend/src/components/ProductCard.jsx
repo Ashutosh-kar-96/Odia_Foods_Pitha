@@ -19,6 +19,10 @@ export default function ProductCard({ product }) {
         setToast({ emoji: "❤️", text: "Added to wishlist!" });
         setTimeout(() => setToast(null), 3000);
       }
+      if (result === "removed") {
+        setToast({ emoji: "💔", text: "Removed from wishlist!" });
+        setTimeout(() => setToast(null), 3000);
+      }
     } catch {
       navigate("/");
     }

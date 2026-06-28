@@ -15,7 +15,7 @@ export const products = [
     price: 249,
     availability: "In Stock",
     sizes: "250g, 500g, 1kg",
-    image_url: "https://images.unsplash.com/photo-1605197183305-6e6f00598346?auto=format&fit=crop&w=900&q=80",
+    image_url: "https://res.cloudinary.com/dqac99h6g/image/upload/v1750780000/WhatsApp_Image_2026-06-23_at_8.18.23_PM_-_Copy_piag3k.jpg",
     festival_tag: "Manabasa Gurubar"
   },
   {
@@ -34,7 +34,7 @@ export const products = [
     price: 189,
     availability: "Seasonal",
     sizes: "Pack of 6, Pack of 12",
-    image_url: "https://images.unsplash.com/photo-1610192244261-3f33de3f55e4?auto=format&fit=crop&w=900&q=80",
+    image_url: "https://res.cloudinary.com/dqac99h6g/image/upload/v1750780000/WhatsApp_Image_2026-06-23_at_8.18.23_PM_1_-_Copy_kxt2bt",
     festival_tag: "Prathamastami"
   },
   {
@@ -53,7 +53,7 @@ export const products = [
     price: 199,
     availability: "In Stock",
     sizes: "Pack of 8, Pack of 16",
-    image_url: "https://images.unsplash.com/photo-1630383249896-424e482df921?auto=format&fit=crop&w=900&q=80",
+    image_url: "https://res.cloudinary.com/dqac99h6g/image/upload/v1750780000/WhatsApp_Image_2026-06-23_at_8.18.23_PM_2_-_Copy_anzqik",
     festival_tag: "Raja"
   },
   {
@@ -72,7 +72,7 @@ export const products = [
     price: 229,
     availability: "In Stock",
     sizes: "Pack of 6, Pack of 12",
-    image_url: "https://images.unsplash.com/photo-1606491956689-2ea866880c84?auto=format&fit=crop&w=900&q=80",
+    image_url: "https://res.cloudinary.com/dqac99h6g/image/upload/v1750780000/WhatsApp_Image_2026-06-23_at_8.18.24_PM_ffsftr",
     festival_tag: "Rath Yatra"
   },
   {
@@ -91,7 +91,7 @@ export const products = [
     price: 349,
     availability: "In Stock",
     sizes: "500g, 1kg",
-    image_url: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=900&q=80",
+    image_url: "https://res.cloudinary.com/dqac99h6g/image/upload/v1750780000/WhatsApp_Image_2026-06-23_at_8.18.22_PM_bun8mn",
     festival_tag: "Raja"
   },
   {
@@ -110,7 +110,7 @@ export const products = [
     price: 129,
     availability: "In Stock",
     sizes: "Pack of 8, Pack of 16",
-    image_url: "https://images.unsplash.com/photo-1589301760014-d929f3979dbc?auto=format&fit=crop&w=900&q=80",
+    image_url: "https://res.cloudinary.com/dqac99h6g/image/upload/v1750780000/WhatsApp_Image_2026-06-23_at_8.18.24_PM_1_wewx34",
     festival_tag: "Everyday Traditional"
   },
   {
@@ -129,7 +129,7 @@ export const products = [
     price: 149,
     availability: "Seasonal",
     sizes: "Pack of 6, Pack of 12",
-    image_url: "https://images.unsplash.com/photo-1519676867240-f03562e64548?auto=format&fit=crop&w=900&q=80",
+    image_url: "https://res.cloudinary.com/dqac99h6g/image/upload/v1750780000/WhatsApp_Image_2026-06-23_at_8.18.24_PM_2_pn9icy",
     festival_tag: "Chitalagi Amavasya"
   },
   {
@@ -148,7 +148,7 @@ export const products = [
     price: 269,
     availability: "In Stock",
     sizes: "250g, 500g",
-    image_url: "https://images.unsplash.com/photo-1601303516534-4d0857bd9b13?auto=format&fit=crop&w=900&q=80",
+    image_url: "https://res.cloudinary.com/dqac99h6g/image/upload/v1750780000/WhatsApp_Image_2026-06-23_at_8.18.25_PM_mmffsz",
     festival_tag: "Wedding Special"
   },
   {
@@ -167,7 +167,7 @@ export const products = [
     price: 179,
     availability: "In Stock",
     sizes: "500ml, 1L",
-    image_url: "https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=900&q=80",
+    image_url: "https://res.cloudinary.com/dqac99h6g/image/upload/v1750780000/Panchamrit_Recipe_Puja_Charnamrit_-_Fun_FOOD____sywwht",
     festival_tag: "Winter Special"
   },
   {
@@ -186,7 +186,7 @@ export const products = [
     price: 149,
     availability: "Seasonal",
     sizes: "500ml, 1L",
-    image_url: "https://images.unsplash.com/photo-1622597467836-f3285f2131b8?auto=format&fit=crop&w=900&q=80",
+    image_url: "https://res.cloudinary.com/dqac99h6g/image/upload/v1750780000/download_m71qzs",
     festival_tag: "Pana Sankranti"
   },
   {
@@ -205,7 +205,7 @@ export const products = [
     price: 129,
     availability: "In Stock",
     sizes: "500ml, 1L",
-    image_url: "https://images.unsplash.com/photo-1553530666-ba11a7da3888?auto=format&fit=crop&w=900&q=80",
+    image_url: "https://res.cloudinary.com/dqac99h6g/image/upload/v1750780000/Sattu_Sarbat_tfkv4e",
     festival_tag: "Summer Special"
   },
   {
@@ -224,7 +224,7 @@ export const products = [
     price: 99,
     availability: "In Stock",
     sizes: "500ml, 1L",
-    image_url: "https://images.unsplash.com/photo-1544145945-f90425340c7e?auto=format&fit=crop&w=900&q=80",
+    image_url: "https://res.cloudinary.com/dqac99h6g/image/upload/v1750780000/Curd_s_good_but_these_10_probiotic_foods_work_wonders_for_your_gut_yktmsb",
     festival_tag: "Rath Yatra"
   }
 ];

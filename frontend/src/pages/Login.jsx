@@ -4,7 +4,7 @@ import heroImage from "../assets/odisha-pitha-hero.png";
 import { useAuth } from "../store/AuthContext";
 
 const foodVideo =
-  "https://videos.pexels.com/video-files/3195650/3195650-uhd_2560_1440_25fps.mp4";
+  "https://res.cloudinary.com/dqac99h6g/video/upload/i_want_a_short_video_that_run_z9prxr.mp4";
 
 export default function Login() {
   const navigate = useNavigate();

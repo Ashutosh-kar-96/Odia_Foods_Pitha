@@ -13,6 +13,8 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { products, knowledgePosts } from "./data/seedData.js";
 
+console.log("SERVER FILE LOADED:", import.meta.url);
+
 dotenv.config();
 
 const app = express();
@@ -338,7 +340,19 @@ app.get("/api/admin/stats", auth, adminOnly, async (_req, res, next) => {
     const [sales] = await query("SELECT COALESCE(SUM(total), 0) AS totalSales, COUNT(*) AS orders FROM orders");
     const [users] = await query("SELECT COUNT(*) AS users FROM users");
     const [products] = await query("SELECT COUNT(*) AS products FROM products");
-    const recentOrders = await query("SELECT * FROM orders ORDER BY created_at DESC LIMIT 6");
+    const recentOrders = await query(
+      `SELECT o.id, o.order_number, o.total, o.shipping_address, o.created_at,
+          u.name AS customer_name
+   FROM orders o
+   JOIN users u ON u.id = o.user_id
+   ORDER BY o.created_at DESC LIMIT 6`
+    );
+    for (const order of recentOrders) {
+      order.items = await query(
+        `SELECT product_name, quantity, price, size FROM order_items WHERE order_id = :id`,
+        { id: order.id }
+      );
+    }
     res.json({ ...sales, ...users, ...products, recentOrders });
   } catch (error) {
     next(error);
@@ -388,6 +402,49 @@ app.get("/api/admin/notifications", auth, adminOnly, async (_req, res, next) => 
     const rows = await query("SELECT * FROM admin_notifications WHERE is_read = 0 ORDER BY created_at DESC");
     res.json(rows);
   } catch (error) { next(error); }
+});
+
+app.get("/api/admin/sales-chart", auth, adminOnly, async (req, res, next) => {
+  console.log("SALES CHART ROUTE HIT");
+  try {
+    const days = Math.min(Math.max(Number(req.query.days) || 7, 1), 30);
+    const rows = await query(
+      `SELECT DATE(created_at) AS date, COALESCE(SUM(total), 0) AS sales, COUNT(*) AS orders
+       FROM orders
+       WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL :days DAY)
+       GROUP BY DATE(created_at)
+       ORDER BY date ASC`,
+      { days }
+    );
+    res.json(rows);
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get("/api/admin/orders-by-date", auth, adminOnly, async (req, res, next) => {
+  try {
+    const { date } = req.query;
+    if (!date) return res.status(400).json({ message: "Date is required" });
+    const orders = await query(
+      `SELECT o.id, o.order_number, o.total, o.created_at,
+              u.name AS customer_name, u.email AS customer_email
+       FROM orders o
+       JOIN users u ON u.id = o.user_id
+       WHERE DATE(o.created_at) = :date
+       ORDER BY o.created_at DESC`,
+      { date }
+    );
+    for (const order of orders) {
+      order.items = await query(
+        `SELECT product_name, quantity, price, size FROM order_items WHERE order_id = :id`,
+        { id: order.id }
+      );
+    }
+    res.json(orders);
+  } catch (error) {
+    next(error);
+  }
 });
 
 app.patch("/api/admin/notifications/:id/read", auth, adminOnly, async (req, res, next) => {

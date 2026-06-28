@@ -165,7 +165,10 @@ export default function ProductDetails() {
                 <ShoppingBag size={18} /> Add to Cart
               </button>
               <button
-                onClick={() => addToCart(product, quantity, size)}
+                onClick={async () => {
+                  await addToCart(product, quantity, size);
+                  navigate("/checkout");
+                }}
                 className="btn-secondary"
               >
                 Buy Now

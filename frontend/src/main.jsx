@@ -5,18 +5,21 @@ import App from "./App.jsx";
 import { AuthProvider } from "./store/AuthContext.jsx";
 import { CartProvider } from "./store/CartContext.jsx";
 import { WishlistProvider } from "./store/WishlistContext.jsx";
+import { CouponProvider } from "./store/CouponContext.jsx";
 import "./styles.css";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <BrowserRouter>
       <AuthProvider>
-        <WishlistProvider>
-          <CartProvider>
-            <App />
-          </CartProvider>
-        </WishlistProvider>
+        <CouponProvider>
+          <WishlistProvider>
+            <CartProvider>
+              <App />
+            </CartProvider>
+          </WishlistProvider>
+        </CouponProvider>
       </AuthProvider>
     </BrowserRouter>
-  </React.StrictMode>
+  </React.StrictMode>,
 );

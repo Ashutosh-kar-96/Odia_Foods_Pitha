@@ -6,12 +6,16 @@ import heroImage from "../assets/odisha-pitha-hero.png";
 import LoadingGrid from "../components/LoadingGrid";
 import ProductCard from "../components/ProductCard";
 import { fallbackProducts } from "../data/fallbackProducts";
+import { useAuth } from "../store/AuthContext";
+import { useCoupon } from "../store/CouponContext";
 
 const festivals = ["Raja", "Rath Yatra", "Makar Sankranti", "Manabasa Gurubar", "Pana Sankranti"];
 
 export default function Home() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { isAdmin } = useAuth();
+  const { coupon } = useCoupon();
 
   useEffect(() => {
     api
@@ -23,6 +27,12 @@ export default function Home() {
 
   return (
     <>
+    {coupon.visible && !isAdmin && coupon.code && (
+  <div className="bg-haldi text-ink text-center py-3 px-4 font-semibold">
+    🎉 Use code <span className="font-bold">{coupon.code}</span>
+    {coupon.description ? ` — ${coupon.description}` : ""}
+  </div>
+)}
       <section className="relative isolate min-h-[720px] overflow-hidden bg-temple text-white">
         <img src={heroImage} alt="Traditional Odisha Pithas and Panas" className="absolute inset-0 -z-10 h-full w-full object-cover" />
         <div className="absolute inset-0 -z-10 bg-gradient-to-r from-temple via-temple/80 to-temple/20" />

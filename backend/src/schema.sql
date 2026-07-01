@@ -79,6 +79,8 @@ CREATE TABLE IF NOT EXISTS orders (
   payment_status VARCHAR(40) NOT NULL DEFAULT 'Pending',
   payment_provider VARCHAR(40) NOT NULL DEFAULT 'Razorpay',
   total DECIMAL(10,2) NOT NULL,
+  coupon_code VARCHAR(40),
+  discount DECIMAL(10,2) NOT NULL DEFAULT 0,
   shipping_address TEXT NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
@@ -113,4 +115,14 @@ CREATE TABLE IF NOT EXISTS admin_notifications (
   is_read    TINYINT NOT NULL DEFAULT 0,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS coupons (
+  id             INT AUTO_INCREMENT PRIMARY KEY,
+  code           VARCHAR(40) NOT NULL,
+  description    VARCHAR(255) NOT NULL DEFAULT '',
+  discount_type  ENUM('flat', 'percent') NOT NULL DEFAULT 'percent',
+  discount_value DECIMAL(10,2) NOT NULL DEFAULT 0,
+  is_visible     TINYINT NOT NULL DEFAULT 0,
+  updated_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );

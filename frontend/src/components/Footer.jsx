@@ -28,11 +28,11 @@ export default function Footer() {
             <div className="mt-4 grid gap-3 text-white/75">
               <a href="tel:+919692240082" className="flex items-center gap-2 hover:text-white transition-colors">
                 <span>📞</span>
-                <span>+91 96922 40082</span>
+                <span>+91 9437302006</span>
               </a>
               <a href="mailto:ashu.kar2003@gmail.com" className="flex items-center gap-2 hover:text-white transition-colors">
                 <span>✉️</span>
-                <span>ashu.kar2003@gmail.com</span>
+                <span>kirti.chanakya@gmail.com</span>
               </a>
             </div>
           </div>

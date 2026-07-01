@@ -277,14 +277,32 @@ app.post("/api/payments/razorpay-order", auth, async (req, res, next) => {
 
 app.post("/api/orders", auth, async (req, res, next) => {
   try {
-    const { items, shippingAddress, paymentStatus = "Paid" } = req.body;
+    const { items, shippingAddress, paymentStatus = "Paid", couponCode = null } = req.body;
     if (!items?.length) return res.status(400).json({ message: "Order needs at least one item" });
-    const total = items.reduce((sum, item) => sum + Number(item.price) * Number(item.quantity), 0);
+    const itemsTotal = items.reduce((sum, item) => sum + Number(item.price) * Number(item.quantity), 0);
+
+    // Re-validate the coupon server-side rather than trusting a client-sent discount amount
+    let discount = 0;
+    let appliedCouponCode = null;
+    if (couponCode) {
+      const rows = await query("SELECT * FROM coupons ORDER BY id DESC LIMIT 1");
+      const coupon = rows[0];
+      if (coupon && coupon.is_visible && coupon.code.toLowerCase() === String(couponCode).trim().toLowerCase()) {
+        discount = coupon.discount_type === "percent"
+          ? (itemsTotal * Number(coupon.discount_value)) / 100
+          : Number(coupon.discount_value);
+        discount = Math.max(0, Math.min(discount, itemsTotal));
+        discount = Math.round(discount * 100) / 100;
+        appliedCouponCode = coupon.code;
+      }
+    }
+    const total = Math.max(0, itemsTotal - discount);
+
     const orderNumber = `ODP-${Date.now()}`;
     const result = await query(
-      `INSERT INTO orders (user_id, order_number, payment_status, total, shipping_address)
-       VALUES (:userId, :orderNumber, :paymentStatus, :total, :shippingAddress)`,
-      { userId: req.user.id, orderNumber, paymentStatus, total, shippingAddress }
+      `INSERT INTO orders (user_id, order_number, payment_status, total, coupon_code, discount, shipping_address)
+       VALUES (:userId, :orderNumber, :paymentStatus, :total, :couponCode, :discount, :shippingAddress)`,
+      { userId: req.user.id, orderNumber, paymentStatus, total, couponCode: appliedCouponCode, discount, shippingAddress }
     );
     const orderId = result.insertId;
     for (const item of items) {
@@ -452,6 +470,99 @@ app.patch("/api/admin/notifications/:id/read", auth, adminOnly, async (req, res,
     await query("UPDATE admin_notifications SET is_read = 1 WHERE id = :id", { id: req.params.id });
     res.json({ message: "Marked as read" });
   } catch (error) { next(error); }
+});
+
+// Public: anyone (including logged-out) can hit this, but data only returns if admin made it visible
+app.get("/api/coupon", async (_req, res, next) => {
+  try {
+    const rows = await query("SELECT code, description, is_visible FROM coupons ORDER BY id DESC LIMIT 1");
+    const coupon = rows[0];
+    if (!coupon || !coupon.is_visible) {
+      return res.json({ visible: false, code: "", description: "" });
+    }
+    res.json({ visible: true, code: coupon.code, description: coupon.description });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Admin: view full coupon state (even when hidden)
+app.get("/api/admin/coupon", auth, adminOnly, async (_req, res, next) => {
+  try {
+    const rows = await query("SELECT * FROM coupons ORDER BY id DESC LIMIT 1");
+    res.json(rows[0] || { code: "", description: "", is_visible: 0 });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Admin: create/update coupon + set visibility
+app.put("/api/admin/coupon", auth, adminOnly, async (req, res, next) => {
+  try {
+    const { code, description = "", visible = false, discountType = "percent", discountValue = 0 } = req.body;
+    if (!code) return res.status(400).json({ message: "Coupon code is required" });
+    if (!["flat", "percent"].includes(discountType)) {
+      return res.status(400).json({ message: "discountType must be 'flat' or 'percent'" });
+    }
+
+    const existing = await query("SELECT id FROM coupons ORDER BY id DESC LIMIT 1");
+    if (existing[0]) {
+      await query(
+        "UPDATE coupons SET code = :code, description = :description, discount_type = :discountType, discount_value = :discountValue, is_visible = :visible WHERE id = :id",
+        { code, description, discountType, discountValue, visible: visible ? 1 : 0, id: existing[0].id }
+      );
+    } else {
+      await query(
+        "INSERT INTO coupons (code, description, discount_type, discount_value, is_visible) VALUES (:code, :description, :discountType, :discountValue, :visible)",
+        { code, description, discountType, discountValue, visible: visible ? 1 : 0 }
+      );
+    }
+    res.json({ message: "Coupon saved" });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Public: validate a coupon code entered at checkout and return the discount to apply
+app.post("/api/coupon/apply", async (req, res, next) => {
+  try {
+    const { code = "", amount = 0 } = req.body;
+    if (!code.trim()) return res.status(400).json({ message: "Enter a coupon code" });
+
+    const rows = await query("SELECT * FROM coupons ORDER BY id DESC LIMIT 1");
+    const coupon = rows[0];
+    if (!coupon || !coupon.is_visible || coupon.code.toLowerCase() !== code.trim().toLowerCase()) {
+      return res.status(404).json({ message: "Invalid or expired coupon code" });
+    }
+
+    const baseAmount = Number(amount) || 0;
+    let discount = coupon.discount_type === "percent"
+      ? (baseAmount * Number(coupon.discount_value)) / 100
+      : Number(coupon.discount_value);
+    discount = Math.max(0, Math.min(discount, baseAmount));
+
+    res.json({
+      code: coupon.code,
+      discountType: coupon.discount_type,
+      discountValue: Number(coupon.discount_value),
+      discount: Math.round(discount * 100) / 100
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Admin: toggle visibility only
+app.patch("/api/admin/coupon/visibility", auth, adminOnly, async (_req, res, next) => {
+  try {
+    const existing = await query("SELECT * FROM coupons ORDER BY id DESC LIMIT 1");
+    if (!existing[0]) return res.status(404).json({ message: "No coupon to toggle. Save one first." });
+    const next_visible = existing[0].is_visible ? 0 : 1;
+    await query("UPDATE coupons SET is_visible = :v WHERE id = :id", { v: next_visible, id: existing[0].id });
+    res.json({ message: "Visibility toggled", is_visible: next_visible });
+  } catch (error) {
+    next(error);
+  }
 });
 
 app.use((error, _req, res, _next) => {

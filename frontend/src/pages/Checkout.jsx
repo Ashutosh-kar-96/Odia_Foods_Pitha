@@ -2,15 +2,47 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../api/axios";
 import { useCart } from "../store/CartContext";
+import { useCoupon } from "../store/CouponContext";
 import { money } from "../utils/format";
 
 export default function Checkout() {
   const navigate = useNavigate();
   const { items, total, clearCart } = useCart();
+  const { applyCoupon } = useCoupon();
   const [address, setAddress] = useState("");
   const [loading, setLoading] = useState(false);
+  const [couponCode, setCouponCode] = useState("");
+  const [couponStatus, setCouponStatus] = useState(null);
+  const [couponError, setCouponError] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
 
-  const payable = total + 30 + (total > 499 ? 0 : 49);
+  const deliveryCharge = total > 499 ? 0 : 49;
+  const preDiscountPayable = total + 30 + deliveryCharge;
+  const discount = appliedCoupon?.discount || 0;
+  const payable = Math.max(0, preDiscountPayable - discount);
+
+  const handleApplyCoupon = async (event) => {
+    event.preventDefault();
+    if (!couponCode.trim()) return;
+    setCouponStatus("checking");
+    setCouponError("");
+    try {
+      const data = await applyCoupon(couponCode.trim(), preDiscountPayable);
+      setAppliedCoupon(data);
+      setCouponStatus("valid");
+    } catch (error) {
+      setAppliedCoupon(null);
+      setCouponStatus("invalid");
+      setCouponError(error?.response?.data?.message || "Invalid or expired coupon code");
+    }
+  };
+
+  const removeCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponCode("");
+    setCouponStatus(null);
+    setCouponError("");
+  };
 
   const placeOrder = async (event) => {
     event.preventDefault();
@@ -19,7 +51,8 @@ export default function Checkout() {
     await api.post("/orders", {
       items: items.map((item) => ({ ...item, product_id: item.id })),
       shippingAddress: address,
-      paymentStatus: "Paid"
+      paymentStatus: "Paid",
+      couponCode: appliedCoupon?.code || null
     });
     clearCart();
     navigate("/orders");
@@ -46,7 +79,50 @@ export default function Checkout() {
               </div>
             ))}
           </div>
-          <div className="mt-5 flex justify-between border-t border-temple/10 pt-5 text-xl font-bold">
+
+          <div className="mt-5 border-t border-temple/10 pt-5">
+            <p className="text-sm font-semibold text-ink/80">Coupon Code</p>
+            {appliedCoupon ? (
+              <div className="mt-2 flex items-center justify-between rounded-md bg-palm/10 px-3 py-2 text-sm">
+                <span>
+                  <span className="font-bold text-palm">{appliedCoupon.code}</span> applied — you saved {money(discount)}
+                </span>
+                <button type="button" className="text-xs font-semibold text-sindoor underline" onClick={removeCoupon}>
+                  Remove
+                </button>
+              </div>
+            ) : (
+              <div className="mt-2 flex gap-2">
+                <input
+                  className="input flex-1"
+                  placeholder="Enter coupon code"
+                  value={couponCode}
+                  onChange={(event) => setCouponCode(event.target.value)}
+                />
+                <button type="button" className="btn-secondary" disabled={couponStatus === "checking"} onClick={handleApplyCoupon}>
+                  {couponStatus === "checking" ? "Checking..." : "Apply"}
+                </button>
+              </div>
+            )}
+            {couponStatus === "invalid" && (
+              <p className="mt-2 text-xs font-medium text-sindoor">{couponError}</p>
+            )}
+          </div>
+
+          <div className="mt-5 space-y-2 border-t border-temple/10 pt-5 text-sm">
+            <div className="flex justify-between">
+              <span>Subtotal</span>
+              <span>{money(preDiscountPayable)}</span>
+            </div>
+            {discount > 0 && (
+              <div className="flex justify-between text-palm">
+                <span>Coupon discount</span>
+                <span>-{money(discount)}</span>
+              </div>
+            )}
+          </div>
+
+          <div className="mt-3 flex justify-between border-t border-temple/10 pt-5 text-xl font-bold">
             <span>Payable</span>
             <span>{money(payable)}</span>
           </div>

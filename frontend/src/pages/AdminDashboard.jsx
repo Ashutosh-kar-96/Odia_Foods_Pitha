@@ -19,6 +19,7 @@ import {
 import api from "../api/axios";
 import { money } from "../utils/format";
 import InvoicePrintModal from "../components/InvoicePrintModal";
+import { useCoupon } from "../store/CouponContext";
 
 const today = new Date().toISOString().slice(0, 10);
 const nextWeek = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
@@ -91,6 +92,28 @@ export default function AdminDashboard() {
   const [chartData, setChartData] = useState([]);
   const [chartLoading, setChartLoading] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
+const { saveCoupon, toggleVisibility, fetchAdminCoupon } = useCoupon();
+
+const [couponForm, setCouponForm] = useState({
+  code: "",
+  description: "",
+  discountType: "percent",
+  discountValue: 0,
+});
+
+const [couponVisible, setCouponVisible] = useState(false);
+
+useEffect(() => {
+  fetchAdminCoupon().then((data) => {
+    setCouponForm({
+      code: data.code,
+      description: data.description,
+      discountType: data.discountType,
+      discountValue: data.discountValue,
+    });
+    setCouponVisible(data.visible);
+  });
+}, []);
 
   const loadStats = () =>
     api
@@ -191,7 +214,6 @@ export default function AdminDashboard() {
 
   return (
     <section className="container-page py-12">
-
       <p className="font-semibold uppercase tracking-[0.2em] text-clay">
         Admin
       </p>
@@ -212,6 +234,88 @@ export default function AdminDashboard() {
           </div>
         ))}
       </div>
+
+      {/* Coupon Management (admin only) */}
+      <section className="mt-8 rounded-xl border border-temple/10 bg-white p-6 shadow-sm">
+        <h2 className="font-display text-xl font-bold text-temple">
+          Coupon Management
+        </h2>
+        <p className="mt-1 text-xs text-ink/50">
+          Customers only see this after login when you switch it ON.
+        </p>
+        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+          <input
+            className="input"
+            placeholder="Coupon code, e.g. RAJA20"
+            value={couponForm.code}
+            onChange={(e) =>
+              setCouponForm({ ...couponForm, code: e.target.value })
+            }
+          />
+          <input
+            className="input"
+            placeholder="Description, e.g. 20% off Raja orders"
+            value={couponForm.description}
+            onChange={(e) =>
+              setCouponForm({ ...couponForm, description: e.target.value })
+            }
+          />
+            <select
+              className="input"
+              value={couponForm.discountType}
+              onChange={(e) =>
+                setCouponForm({
+                  ...couponForm,
+                  discountType: e.target.value,
+                })
+              }
+            >
+              <option value="percent">Percentage off (%)</option>
+              <option value="flat">Flat amount off (₹)</option>
+            </select>
+
+            <input
+              className="input"
+              type="number"
+              min="0"
+              step="0.01"
+              placeholder={
+                couponForm.discountType === "percent"
+                  ? "e.g. 10 for 10%"
+                  : "e.g. 50 for ₹50 off"
+              }
+              value={couponForm.discountValue}
+              onChange={(e) =>
+                setCouponForm({
+                  ...couponForm,
+                  discountValue: e.target.value,
+                })
+              }
+            />
+        </div>
+        <div className="mt-4 flex flex-wrap items-center gap-4">
+          <button
+            className="btn-primary"
+            onClick={async () => {
+              await saveCoupon({ ...couponForm, visible: couponVisible });
+            }}
+          >
+            Save Coupon
+          </button>
+          <button
+            className={`btn-secondary ${couponVisible ? "bg-palm text-white hover:bg-palm hover:text-white" : ""}`}
+            onClick={async () => {
+              await toggleVisibility();
+              const data = await fetchAdminCoupon();
+              setCouponVisible(data.visible);
+            }}
+          >
+            {couponVisible
+              ? "Visible to Customers (ON)"
+              : "Hidden from Customers (OFF)"}
+          </button>
+        </div>
+      </section>
 
       {/* Sales Chart + Orders by Date side by side */}
       <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_380px]">
@@ -453,7 +557,10 @@ export default function AdminDashboard() {
           <div className="mt-5 grid gap-3">
             {stats?.recentOrders?.length ? (
               stats.recentOrders.map((order) => (
-                <div key={order.id} className="rounded-lg border border-temple/15 bg-white px-4 py-4 shadow-sm">
+                <div
+                  key={order.id}
+                  className="rounded-lg border border-temple/15 bg-white px-4 py-4 shadow-sm"
+                >
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-semibold text-temple">
                       {order.order_number}

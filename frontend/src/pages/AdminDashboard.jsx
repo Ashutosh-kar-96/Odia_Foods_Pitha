@@ -40,6 +40,7 @@ const initialForm = {
   storage: "",
   shelf_life_days: 7,
   price: "",
+  price_unit: "piece",
   availability: "In Stock",
   sizes: "250g, 500g",
   image_url: "",
@@ -664,15 +665,21 @@ useEffect(() => {
               <option>Festival Special</option>
             </select>
           </div>
-          <div className="grid gap-4 md:grid-cols-4">
-            <input
-              className="input"
-              required
-              type="number"
-              placeholder="Price"
-              value={form.price}
-              onChange={(e) => update("price", e.target.value)}
-            />
+          <div className="grid gap-4 md:grid-cols-5">
+            <select
+  className="input"
+  value={form.price_unit}
+  onChange={(e) => update("price_unit", e.target.value)}
+>
+  <option value="piece">Per Piece</option>
+  <option value="kg">Per Kg</option>
+  <option value="gram">Per Gram</option>
+  <option value="100g">Per 100g</option>
+  <option value="250g">Per 250g</option>
+  <option value="500g">Per 500g</option>
+  <option value="litre">Per Litre</option>
+  <option value="dozen">Per Dozen</option>
+</select>
             <input
               className="input"
               required

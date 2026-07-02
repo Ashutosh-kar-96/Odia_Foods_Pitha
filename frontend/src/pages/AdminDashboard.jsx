@@ -666,46 +666,65 @@ useEffect(() => {
             </select>
           </div>
           <div className="grid gap-4 md:grid-cols-5">
-            <select
-  className="input"
-  value={form.price_unit}
-  onChange={(e) => update("price_unit", e.target.value)}
->
-  <option value="piece">Per Piece</option>
-  <option value="kg">Per Kg</option>
-  <option value="gram">Per Gram</option>
-  <option value="100g">Per 100g</option>
-  <option value="250g">Per 250g</option>
-  <option value="500g">Per 500g</option>
-  <option value="litre">Per Litre</option>
-  <option value="dozen">Per Dozen</option>
-</select>
-            <input
-              className="input"
-              required
-              type="number"
-              placeholder="Stock"
-              value={form.stock}
-              onChange={(e) => update("stock", e.target.value)}
-            />
-            <input
-              className="input"
-              required
-              type="number"
-              placeholder="Shelf life days"
-              value={form.shelf_life_days}
-              onChange={(e) => update("shelf_life_days", e.target.value)}
-            />
-            <select
-              className="input"
-              value={form.availability}
-              onChange={(e) => update("availability", e.target.value)}
-            >
-              <option>In Stock</option>
-              <option>Seasonal</option>
-              <option>Out of Stock</option>
-            </select>
-          </div>
+
+  {/* Price */}
+  <input
+    className="input"
+    required
+    type="number"
+    placeholder="Price"
+    value={form.price}
+    onChange={(e) => update("price", e.target.value)}
+  />
+
+  {/* Price Unit */}
+  <select
+    className="input"
+    value={form.price_unit}
+    onChange={(e) => update("price_unit", e.target.value)}
+  >
+    <option value="piece">Per Piece</option>
+    <option value="kg">Per Kg</option>
+    <option value="gram">Per Gram</option>
+    <option value="100g">Per 100g</option>
+    <option value="250g">Per 250g</option>
+    <option value="500g">Per 500g</option>
+    <option value="litre">Per Litre</option>
+    <option value="dozen">Per Dozen</option>
+  </select>
+
+  {/* Stock */}
+  <input
+    className="input"
+    required
+    type="number"
+    placeholder="Stock"
+    value={form.stock}
+    onChange={(e) => update("stock", e.target.value)}
+  />
+
+  {/* Shelf Life */}
+  <input
+    className="input"
+    required
+    type="number"
+    placeholder="Shelf life days"
+    value={form.shelf_life_days}
+    onChange={(e) => update("shelf_life_days", e.target.value)}
+  />
+
+  {/* Availability */}
+  <select
+    className="input"
+    value={form.availability}
+    onChange={(e) => update("availability", e.target.value)}
+  >
+    <option>In Stock</option>
+    <option>Seasonal</option>
+    <option>Out of Stock</option>
+  </select>
+
+</div>
           <div className="grid gap-4 md:grid-cols-3">
             <input
               className="input"
